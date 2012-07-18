@@ -109,7 +109,6 @@ class Compiler:
             if os.path.exists(folder):
                 shutil.rmtree(folder)
 
-            import pdb; pdb.set_trace();
             # Check out project
             p = Popen(['git', 'clone', self.settings['git_url'], folder], stdout=PIPE)
             p.communicate()
@@ -124,10 +123,8 @@ class Compiler:
             # Copy over htaccess file
             shutil.copyfile('base_files/htaccess', '%s/.htaccess' % folder)
 
-            # Remove build file
-            os.remove('%s.json' % folder)
-
-        json.dump(self.logs, open('%s_log.json' % folder, 'w'))
+        # TODO: Put this back!!!
+        #json.dump(self.logs, open('%s_log.json' % folder, 'w'))
 
 if __name__ == '__main__':
     folder = sys.argv[1]
