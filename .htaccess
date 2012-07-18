@@ -7,10 +7,15 @@ ErrorDocument 403 /error.html
 Options +FollowSymLinks
 
 RewriteEngine On
+
+# Not sure what this does...
 RewriteRule ^subdomains/(.*)/(.*) http://$1.appcloudyapp.com/$2 [r=301,nc]
 
+RewriteRule ^start_job$ accept_job.php [QSA,L]
+
+# This seems to be redirecting properly?
 RewriteCond %{ENV:REDIRECT_STATUS} ^$
 RewriteCond %{HTTP_HOST} !^(www\.)?appcloudyapp\.com$ [NC]
 RewriteCond %{HTTP_HOST} ^(www\.)?([^\.]+)\.appcloudyapp\.com$ [NC]
-RewriteRule ^(.*)$ apps/%2/$1 [QSA,L]
 
+RewriteRule ^(.*)$ apps/%2/$1 [QSA,L]
