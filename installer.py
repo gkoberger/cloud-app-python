@@ -4,6 +4,7 @@ import re
 import shutil
 from subprocess import Popen, PIPE
 import sys
+import urllib2
 
 class Compiler:
     settings = []
@@ -72,7 +73,7 @@ class Compiler:
 
     def create_manifest(self):
         manifest = {
-                'name': self.settings['name'],
+                'name': self.settings['repo_name'],
                 'description': self.settings['description'],
                 'icons': {
                     '16': 'http://%s.appcloudy.com/icon-16.png' % self.subdomain,
@@ -91,16 +92,24 @@ class Compiler:
         # - 3: Info
         self.logs.append(dict(severity=severity, error=error, more=more))
 
-    def __init__(self, folder, subdomain):
+    def __init__(self, folder, subdomain, job_id):
         self.subdomain = subdomain
         self.folder = folder
         self.settings = []
-        if os.path.exists('%s.json' % folder):
-            self.settings = json.load(open('%s.json' % folder))
 
+        req = urllib2.Request("http://appcloudy.com/getjob/%s_%s/" % (subdomain, job_id))
+        print "http://appcloudy.com/getjob/%s_%s/" % (subdomain, job_id)
+        opener = urllib2.build_opener()
+        f = opener.open(req)
+
+        self.settings = json.load(f)
+
+
+        if(self.settings['job_found']):
             if os.path.exists(folder):
                 shutil.rmtree(folder)
 
+            import pdb; pdb.set_trace();
             # Check out project
             p = Popen(['git', 'clone', self.settings['git_url'], folder], stdout=PIPE)
             p.communicate()
@@ -122,5 +131,7 @@ class Compiler:
 
 if __name__ == '__main__':
     folder = sys.argv[1]
-    c = Compiler('apps/%s' % folder, folder)
+    job_id = sys.argv[2]
+
+    c = Compiler('apps/%s' % folder, folder, job_id)
 

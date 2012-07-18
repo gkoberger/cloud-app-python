@@ -1,0 +1,10 @@
+AddType application/x-web-app-manifest+json .webapp
+AddType text/css .less
+AddType text/javascript .coffee
+
+RewriteEngine On
+RewriteCond %{REQUEST_URI} icon-[0-9]*\.(jpg|gif|png)$ [NC]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule .*$ /no_icon.png [L]
+
