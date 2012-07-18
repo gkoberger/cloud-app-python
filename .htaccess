@@ -3,3 +3,14 @@ IndexIgnore *
 
 ErrorDocument 404 /error.html
 ErrorDocument 403 /error.html
+
+Options +FollowSymLinks
+
+RewriteEngine On
+RewriteRule ^subdomains/(.*)/(.*) http://$1.appcloudy.com/$2 [r=301,nc]
+
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteCond %{HTTP_HOST} !^(www\.)?appcloudy\.com$ [NC]
+RewriteCond %{HTTP_HOST} ^(www\.)?([^\.]+)\.appcloudy\.com$ [NC]
+RewriteRule ^(.*)$ apps/%2/$1 [QSA,L]
+
