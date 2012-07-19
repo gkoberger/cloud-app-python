@@ -123,8 +123,8 @@ class Compiler:
             # Copy over htaccess file
             shutil.copyfile('base_files/htaccess', '%s/.htaccess' % folder)
 
-        # TODO: Put this back!!!
-        #json.dump(self.logs, open('%s_log.json' % folder, 'w'))
+        os.mkdirs('logs/%s' % subdomain);
+        json.dump(self.logs, open('logs/%s/%s_log.json' % (subdomain, job_id), 'w'))
 
 if __name__ == '__main__':
     folder = sys.argv[1]
