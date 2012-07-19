@@ -123,7 +123,9 @@ class Compiler:
             # Copy over htaccess file
             shutil.copyfile('base_files/htaccess', '%s/.htaccess' % folder)
 
-        os.makedirs('logs/%s' % subdomain);
+        if not os.path.exists('logs/%s' % subdomain):
+            os.makedirs('logs/%s' % subdomain);
+
         json.dump(self.logs, open('logs/%s/%s_log.json' % (subdomain, job_id), 'w'))
 
 if __name__ == '__main__':
