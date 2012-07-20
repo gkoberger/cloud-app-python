@@ -12,6 +12,7 @@ RewriteEngine On
 RewriteRule ^subdomains/(.*)/(.*) http://$1.appcloudyapp.com/$2 [r=301,nc]
 
 RewriteRule ^start_job$ accept_job.php [QSA,L]
+RewriteRule ^view_log$ log_viewer.php [QSA,L]
 
 # This seems to be redirecting properly?
 RewriteCond %{ENV:REDIRECT_STATUS} ^$

@@ -6,6 +6,8 @@ from subprocess import Popen, PIPE
 import sys
 import urllib2
 
+IGNORE_PATTERNS = ('CVS','.git')
+
 class Compiler:
     settings = []
     folder = ''
@@ -21,7 +23,15 @@ class Compiler:
 
         for path_child in os.listdir(path):
             full_path = '%s/%s' % (path, path_child)
-            if(os.path.isdir(full_path)):
+            if(path_child == ".git"):
+              pass
+            elif(path_child.startswith(".")):
+              self.log(2, "Removing %s" % path_child, "Hidden files aren't supported")
+              if(os.path.isdir(full_path)):
+                  shutil.rmtree(full_path)
+              else:
+                  os.remove(full_path)
+            elif(os.path.isdir(full_path)):
                 self.check_files(full_path)
             else:
                 suffix = path_child.split('.')[-1]
@@ -115,13 +125,10 @@ class Compiler:
             # Check all the files
             errors = self.check_files(folder_build)
 
-            # No git stuff
-            shutil.rmtree('%s/.git' % folder_build)
-
             # Copy over whole thing
             if os.path.exists(folder):
                 shutil.rmtree(folder)
-            shutil.copytree(folder_build, folder)
+            shutil.copytree(folder_build, folder, ignore=shutil.ignore_patterns(*IGNORE_PATTERNS))
 
             # Copy over htaccess file
             shutil.copyfile('base_files/htaccess', '%s/.htaccess' % folder)
@@ -132,7 +139,13 @@ class Compiler:
         # Save logs
         if not os.path.exists('logs/%s' % subdomain):
             os.makedirs('logs/%s' % subdomain);
-        json.dump(self.logs, open('logs/%s/%s_log.json' % (subdomain, job_id), 'w'))
+        status = {'status': True, 'logs': self.logs}
+        json.dump(status, open('logs/%s/%s_log.json' % (subdomain, job_id), 'w'))
+
+        # Tell the main site we're done
+        req = urllib2.Request("http://appcloudy.com/deploy_finished/%s_%s/" % (subdomain, job_id))
+        opener = urllib2.build_opener()
+        f = opener.open(req)
 
 if __name__ == '__main__':
     folder = sys.argv[1]
