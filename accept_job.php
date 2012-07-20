@@ -10,5 +10,6 @@ $folder = $matches[1];
 $cmd = "python installer.py " . $folder . " " . $job_id;
 $pidfile = "test.pid";
 $out = "/dev/null";
+
 exec(sprintf("%s > %s 2>&1 & echo $! >> %s", $cmd, $out, $pidfile));
 

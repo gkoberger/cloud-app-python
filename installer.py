@@ -98,34 +98,40 @@ class Compiler:
         self.settings = []
 
         req = urllib2.Request("http://appcloudy.com/getjob/%s_%s/" % (subdomain, job_id))
-        print "http://appcloudy.com/getjob/%s_%s/" % (subdomain, job_id)
         opener = urllib2.build_opener()
         f = opener.open(req)
 
         self.settings = json.load(f)
 
-
         if(self.settings['job_found']):
-            if os.path.exists(folder):
-                shutil.rmtree(folder)
+            folder_build = '../build_area/%s' % subdomain
+            if os.path.exists(folder_build):
+                shutil.rmtree(folder_build)
 
             # Check out project
-            p = Popen(['git', 'clone', self.settings['git_url'], folder], stdout=PIPE)
+            p = Popen(['git', 'clone', self.settings['git_url'], folder_build], stdout=PIPE)
             p.communicate()
 
             # Check all the files
-            errors = self.check_files(folder)
+            errors = self.check_files(folder_build)
 
-            # Create manifest
-            self.create_manifest()
-            #shutil.copyfile('base_files/manifest.webapp', '%s/manifest.webapp' % folder)
+            # No git stuff
+            shutil.rmtree('%s/.git' % folder_build)
+
+            # Copy over whole thing
+            if os.path.exists(folder):
+                shutil.rmtree(folder)
+            shutil.copytree(folder_build, folder)
 
             # Copy over htaccess file
             shutil.copyfile('base_files/htaccess', '%s/.htaccess' % folder)
 
+            # Create manifest
+            self.create_manifest()
+
+        # Save logs
         if not os.path.exists('logs/%s' % subdomain):
             os.makedirs('logs/%s' % subdomain);
-
         json.dump(self.logs, open('logs/%s/%s_log.json' % (subdomain, job_id), 'w'))
 
 if __name__ == '__main__':
