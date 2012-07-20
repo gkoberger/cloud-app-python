@@ -144,7 +144,7 @@ class Compiler:
             p.communicate()
 
             # Get HEAD
-            p = Popen(['git', 'rev-parse', '--short', '--git-dir=%s/.git' % folder_build, 'HEAD'], stdout=PIPE)
+            p = Popen(['git', '--git-dir=%s/.git' % folder_build, 'rev-parse', '--short', 'HEAD'], stdout=PIPE)
             head_tuple = p.communicate()
             head = head_tuple[0].strip()
 
