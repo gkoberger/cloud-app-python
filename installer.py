@@ -1,9 +1,11 @@
+import httplib
 import json
 import os
 import re
 import shutil
 from subprocess import Popen, PIPE
 import sys
+import urllib
 import urllib2
 
 IGNORE_PATTERNS = ('CVS','.git')
@@ -102,6 +104,25 @@ class Compiler:
         # - 3: Info
         self.logs.append(dict(severity=severity, error=error, more=more))
 
+    def post(self, url, data_dict):
+        data = urllib.urlencode(data_dict)
+        req = urllib2.Request(url, data)
+        response = urllib2.urlopen(req)
+        the_page = response.read()
+
+        #import pdb; pdb.set_trace()
+
+        return;
+
+        params = urllib.urlencode(data)
+        headers = {"Content-type": "application/x-www-form-urlencoded",
+                   "Accept": "text/plain"}
+
+        conn = httplib.HTTPConnection("appcloudy.com")
+        conn.request("POST", url, params, headers)
+        response = conn.getresponse()
+        conn.close()
+
     def __init__(self, folder, subdomain, job_id):
         self.subdomain = subdomain
         self.folder = folder
@@ -122,6 +143,11 @@ class Compiler:
             p = Popen(['git', 'clone', self.settings['git_url'], folder_build], stdout=PIPE)
             p.communicate()
 
+            # Get HEAD
+            p = Popen(['git', 'rev-parse', '--short', 'HEAD'], stdout=PIPE)
+            head_tuple = p.communicate()
+            head = head_tuple[0]
+
             # Check all the files
             errors = self.check_files(folder_build)
 
@@ -139,13 +165,12 @@ class Compiler:
         # Save logs
         if not os.path.exists('logs/%s' % subdomain):
             os.makedirs('logs/%s' % subdomain);
-        status = {'status': True, 'logs': self.logs}
+        status = {'status': True, 'head': head, 'logs': self.logs}
         json.dump(status, open('logs/%s/%s_log.json' % (subdomain, job_id), 'w'))
 
         # Tell the main site we're done
-        req = urllib2.Request("http://appcloudy.com/deploy_finished/%s_%s/" % (subdomain, job_id))
-        opener = urllib2.build_opener()
-        f = opener.open(req)
+        self.post("https://appcloudy.com/deploy_finished/%s_%s/" % (subdomain, job_id), {'head': head})
+
 
 if __name__ == '__main__':
     folder = sys.argv[1]
