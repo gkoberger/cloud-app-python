@@ -146,7 +146,7 @@ class Compiler:
             # Get HEAD
             p = Popen(['git', 'rev-parse', '--short', 'HEAD'], stdout=PIPE)
             head_tuple = p.communicate()
-            head = head_tuple[0]
+            head = head_tuple[0].strip()
 
             # Check all the files
             errors = self.check_files(folder_build)
